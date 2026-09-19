@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat Clicker</title>
+
+  <!-- Google Fonts: Quicksand with sans-serif fallback (Requirement 1.2) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind config must come BEFORE the CDN script (Requirements 8.1–8.5) -->
+  <script>
+    window.tailwind = {
+      config: {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Quicksand', 'sans-serif'],
+            },
+            keyframes: {
+              // Requirement 8.1 — wiggle: alternating translateX stops
+              wiggle: {
+                '0%':   { transform: 'translateX(0px)' },
+                '25%':  { transform: 'translateX(-10px)' },
+                '50%':  { transform: 'translateX(10px)' },
+                '75%':  { transform: 'translateX(-10px)' },
+                '100%': { transform: 'translateX(0px)' },
+              },
+              // Requirement 8.2 — zzzFloat: opacity 0→1, translateY 0→-30px
+              zzzFloat: {
+                '0%':   { opacity: '0', transform: 'translateY(0px)' },
+                '100%': { opacity: '1', transform: 'translateY(-30px)' },
+              },
+            },
+            animation: {
+              // Requirement 8.3 — animate-wiggle: 0.6s, ease-in-out, 1 iteration
+              wiggle: 'wiggle 0.6s ease-in-out 1',
+              // Requirement 8.4 — animate-zzz: 1s, ease-out, 1 iteration
+              zzz:    'zzzFloat 1s ease-out 1',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Tailwind CSS CDN (Requirement 8.5) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Ensure Quicksand is applied globally; fallback to sans-serif (Requirement 1.2) */
+    body {
+      font-family: 'Quicksand', sans-serif;
+    }
+  </style>
+</head>
+
+<!--
+  body:
+    - min-h-screen so it spans the full viewport height (Requirement 1.1)
+    - flex + items-center + justify-center for centred layout (Requirement 1.3)
+    - Pastel gradient background #FFDEE9 → #B5FFFC (Requirement 1.1)
+-->
+<body
+  class="min-h-screen flex items-center justify-center"
+  style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC);"
+>
+
+  <!-- Main container — cat SVG and UI elements added in tasks 2.1 and 2.2 -->
+  <div class="flex flex-col items-center gap-6">
+
+    <!--
+      Cat_Element — inline SVG (Task 2.1)
+      Requirements: 1.3, 1.4, 2.1, 2.2, 2.3, 11.1, 11.3
+      - tabindex="0"      → keyboard focusable (Req 11.1)
+      - aria-label        → screen-reader description (Req 11.3)
+      - role="img"        → semantic landmark
+      - cursor: pointer   → signals interactivity (Req 2.3)
+      - 280×280 px square → within 200–400 px range (Req 1.4)
+      - no animation class / transform on load → idle state (Req 2.2)
+      - focus-visible ring → visible keyboard focus indicator (Req 11.5)
+    -->
+    <svg
+      id="cat-element"
+      width="280"
+      height="280"
+      viewBox="0 0 280 280"
+      xmlns="http://www.w3.org/2000/svg"
+      tabindex="0"
+      role="img"
+      aria-label="Pet the cat"
+      style="cursor: pointer;"
+      class="focus:outline-none focus-visible:ring-4 focus-visible:ring-pink-400 rounded-full select-none"
+    >
+      <!-- Left ear (triangle) -->
+      <polygon points="62,110 88,48 118,110" fill="#FFB7C5" stroke="#F48FB1" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Left ear inner -->
+      <polygon points="74,104 90,64 108,104" fill="#FF8FAB"/>
+
+      <!-- Right ear (triangle) -->
+      <polygon points="162,110 192,48 218,110" fill="#FFB7C5" stroke="#F48FB1" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Right ear inner -->
+      <polygon points="172,104 190,64 206,104" fill="#FF8FAB"/>
+
+      <!-- Face outline (circle) -->
+      <circle cx="140" cy="158" r="100" fill="#FFF0F5" stroke="#F48FB1" stroke-width="3"/>
+
+      <!-- Left eye -->
+      <ellipse cx="108" cy="148" rx="12" ry="13" fill="#5C3D2E"/>
+      <!-- Left eye shine -->
+      <circle cx="113" cy="143" r="4" fill="white"/>
+
+      <!-- Right eye -->
+      <ellipse cx="172" cy="148" rx="12" ry="13" fill="#5C3D2E"/>
+      <!-- Right eye shine -->
+      <circle cx="177" cy="143" r="4" fill="white"/>
+
+      <!-- Nose (small pink triangle) -->
+      <polygon points="140,168 133,178 147,178" fill="#FF8FAB"/>
+
+      <!-- Mouth (cute W shape) -->
+      <path d="M 130,180 Q 135,188 140,183 Q 145,188 150,180" fill="none" stroke="#F48FB1" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- Left whiskers -->
+      <line x1="60" y1="170" x2="120" y2="172" stroke="#F48FB1" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="58" y1="180" x2="120" y2="178" stroke="#F48FB1" stroke-width="1.5" stroke-linecap="round"/>
+
+      <!-- Right whiskers -->
+      <line x1="160" y1="172" x2="220" y2="170" stroke="#F48FB1" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="160" y1="178" x2="222" y2="180" stroke="#F48FB1" stroke-width="1.5" stroke-linecap="round"/>
+
+      <!-- Blush cheeks -->
+      <ellipse cx="98" cy="170" rx="16" ry="9" fill="#FFB7C5" opacity="0.55"/>
+      <ellipse cx="182" cy="170" rx="16" ry="9" fill="#FFB7C5" opacity="0.55"/>
+    </svg>
+
+    <!--
+      Text_Overlay — Requirements 11.4 (aria-live), 4.3, 5.3, 6.4, 7.3
+      Positioned just below the SVG in flow; the ReactionEngine shows/hides it.
+      Using a wrapper div so it can be absolutely positioned above the cat later
+      when the reaction engine places it via JS, but hidden by default here.
+    -->
+    <div
+      id="text-overlay"
+      role="status"
+      aria-live="polite"
+      class="
+        hidden
+        text-2xl font-bold text-center whitespace-nowrap
+        pointer-events-none select-none
+      "
+    ></div>
+
+    <!--
+      Pet_Counter display — Requirements 1.5, 10.2, 10.3
+      Glassmorphism pill: semi-transparent white 30%, backdrop blur, pill corners, white border 40%.
+    -->
+    <div
+      id="pet-counter-display"
+      class="
+        bg-white/30 backdrop-blur-md rounded-full border border-white/40
+        px-6 py-3
+        text-lg font-semibold text-gray-700
+      "
+    >Total Pets: 0 ✨</div>
+
+    <!--
+      Aura_Counter display — Requirements 4.5
+      Styled consistently with the pet counter.
+    -->
+    <div
+      id="aura-counter-display"
+      class="
+        bg-white/30 backdrop-blur-md rounded-full border border-white/40
+        px-6 py-3
+        text-lg font-semibold text-gray-700
+      "
+    >Aura: 0</div>
+
+  </div>
+
+
+  <!-- SoundManager module -->
+  <script>
+    const SoundManager = {
+      assets: {
+        click:   'sounds/click.mp3',
+        purr:    'sounds/purr.mp3',
+        zoomies: 'sounds/zoomies.mp3',
+      },
+
+      play(assetKey) {
+        const path = this.assets[assetKey];
+        if (!path) return null;
+        const audio = new Audio(path);
+        audio.play().catch(() => {});
+        return audio;
+      },
+
+      stop(instance) {
+        if (!instance) return;
+        instance.pause();
+        instance.currentTime = 0;
+      }
+    };
+  </script>
+
+  <!-- PetCounter module -->
+  <script>
+    const PetCounter = {
+      value: 0,
+
+      init() {
+        try {
+          const raw = parseInt(localStorage.getItem('cat-clicker-pet-count'), 10);
+          this.value = (Number.isInteger(raw) && raw >= 0) ? raw : 0;
+        } catch (e) {
+          this.value = 0;
+        }
+        this.updateDisplay();
+      },
+
+      increment() {
+        this.value += 1;
+        try {
+          localStorage.setItem('cat-clicker-pet-count', String(this.value));
+        } catch (e) {}
+        this.updateDisplay();
+      },
+
+      updateDisplay() {
+        const el = document.getElementById('pet-counter-display');
+        if (el) el.textContent = this.format(this.value);
+      },
+
+      format(n) {
+        return 'Total Pets: ' + n + ' ✨';
+      }
+    };
+
+    PetCounter.init();
+  </script>
+
+
+  <!-- AuraCounter module -->
+  <script>
+    const AuraCounter = {
+      value: 0,
+
+      increment(amount) {
+        this.value += amount;
+        this.updateDisplay();
+      },
+
+      updateDisplay() {
+        const el = document.getElementById('aura-counter-display');
+        if (el) el.textContent = 'Aura: ' + this.value;
+      }
+    };
+  </script>
+
+  <!-- selectReaction pure function (ReactionEngine) -->
+  <script>
+    /**
+     * selectReaction - pure function, no side effects.
+     * Maps integer 1-100 to a reaction type string.
+     * 1-40   → 'happy'
+     * 41-70  → 'purring'
+     * 71-90  → 'sleeping'
+     * 91-100 → 'zoomies'
+     */
+    function selectReaction(n) {
+      if (n >= 1  && n <= 40)  return 'happy';
+      if (n >= 41 && n <= 70)  return 'purring';
+      if (n >= 71 && n <= 90)  return 'sleeping';
+      if (n >= 91 && n <= 100) return 'zoomies';
+      return null; // out-of-range guard (should not occur)
+    }
+  </script>
+
+  <!-- ReactionConfig and AppState -->
+  <script>
+    /**
+     * ReactionConfig — static data records for all four reactions.
+     * Requirements: 3.1, 4.2, 4.3, 5.2, 5.3, 6.2, 6.3, 7.2, 7.3
+     */
+    const ReactionConfig = {
+      happy: {
+        type: 'happy',
+        duration: 1000,
+        animClass: 'animate-bounce',
+        transform: null,
+        overlayText: 'YAY! 😸 (+5 Aura)',
+        soundKey: 'click',
+        auraBonus: 5,
+      },
+      purring: {
+        type: 'purring',
+        duration: 2000,
+        animClass: 'animate-pulse',
+        transform: null,
+        overlayText: 'Purrr... 😻',
+        soundKey: 'purr',
+        auraBonus: 0,
+      },
+      sleeping: {
+        type: 'sleeping',
+        duration: 1500,
+        animClass: null,
+        transform: 'scale(0.9) rotate(6deg)',
+        overlayText: 'shh... 😴',
+        soundKey: 'click',
+        auraBonus: 0,
+      },
+      zoomies: {
+        type: 'zoomies',
+        duration: 800,
+        animClass: 'animate-wiggle',
+        transform: null,
+        overlayText: 'ZOOMIES!! 💨💨',
+        soundKey: 'zoomies',
+        auraBonus: 0,
+      },
+    };
+
+    /**
+     * AppState — runtime state managed by the ReactionEngine.
+     */
+    const AppState = {
+      isIdle: true,
+      activeReaction: null,
+      activeTimers: [],
+    };
+  </script>
+
+</body>
+</html>
